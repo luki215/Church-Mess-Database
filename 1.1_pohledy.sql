@@ -1,40 +1,101 @@
--- Pro manipulaci se möÌ jako s ud·lostÌ
+-- Vypis vsech msi s detaily
 create view Udalosti_Mse as
 (
-	SELECT U.Nazev, U.Konani, U.Kostel_ID, M.Cteni1, M.Cteni2, M.Primluvy 
+	SELECT M.ID, U.Nazev, U.Konani, U.Kostel_ID, M.Cteni1, M.Cteni2, M.Primluvy 
 	FROM Udalosti U
-	JOIN Mse M ON (U.UdalostDetail_ID = M.ID and U.Typ = 1)
+	INNER JOIN Mse M ON (U.UdalostDetail_ID = M.ID and U.Typ = 1)
 )
+
 go
 
--- Pro manipulaci se sv. smÌ¯enÌ jako s ud·lostÌ
+-- Vypis vsech sv. smireni s detaily
 create view Udalosti_SvatostiSmireni as
 (
-	SELECT U.Nazev, U.Konani, U.Kostel_ID, S.Delka, S.Zpovednik_ID 
+	SELECT S.ID, U.Nazev, U.Konani, U.Kostel_ID, S.Delka, S.Zpovednik_ID 
 	FROM Udalosti U
-	JOIN SvatostiSmireni S ON (U.UdalostDetail_ID = S.ID and U.Typ = 2)
+	INNER JOIN SvatostiSmireni S ON (U.UdalostDetail_ID = S.ID and U.Typ = 2)
 )
 go
 
--- Pro manipulaci se sch˘zkami skupinek jako s ud·lostÌ
+-- Vypis vsech schuzek skupinek s detaily
 create view Udalosti_SchuzkySkupinek as
 (
-	SELECT U.Nazev, U.Konani, U.Kostel_ID, S.Popis 
+	SELECT S.ID, U.Nazev, U.Konani, U.Kostel_ID, S.Popis 
 		FROM Udalosti U
-		JOIN SchuzkySkupinek S ON (U.UdalostDetail_ID = S.ID and U.Typ = 3)
+		INNER JOIN SchuzkySkupinek S ON (U.UdalostDetail_ID = S.ID and U.Typ = 3)
 )
 go
 
 
--- seznam möÌ pro farnosti
+-- seznam msi pro farnosti
 create view MseVeFarnostech as 
 (
 	SELECT F.ID as Farnost_ID, F.Jmeno as FarnostJmeno, M.*  
-	FROM Farnosti F JOIN Kostely K on ( K.FaronstID = F.ID )
-	JOIN Udalosti_Mse M on (K.ID = M.Kostel_ID)
+	FROM Farnosti F JOIN Kostely K on ( K.Farnost_ID = F.ID )
+	INNER JOIN Udalosti_Mse M on (K.ID = M.Kostel_ID)
 )
 go
-select * from MseVeFarnostech;
 
 
--- Möe na kter˝ch lekto¯i Ëtou
+-- Mse + kde a kdy lektori ctou
+create view MsePodleLektoru AS
+(	SELECT L.ID as LektorID, L.Jmeno as LektorJmeno, U.Konani, F.Jmeno as FarnostJmeno, K.Jmeno as KostelJmeno  
+	FROM Lektori L JOIN Cteni C ON (L.ID = C.Lektor_ID)
+		INNER JOIN Mse M ON (M.Cteni1 = C.ID or M.Cteni2 = C.ID or M.primluvy = C.ID)
+		INNER JOIN Udalosti U ON (U.UdalostDetail_ID = M.ID and U.Typ = 1)
+		INNER JOIN Kostely K On (U.Kostel_ID = K.ID)
+		INNER JOIN Farnosti F ON (K.Farnost_ID = F.ID)
+)
+
+go
+
+
+-- Kostely a farnosti
+create view FarnostiAKostely AS
+(
+	SELECT F.Jmeno as FarnostJmeno, K.Jmeno as KostelJmeno, K.PolohaLat, K.PolohaLng
+	FROM Kostely K INNER JOIN Farnosti F ON (K.Farnost_ID = F.ID)
+)
+go
+
+
+-- Spravci s farnosti
+create view FarnostiASpravci AS
+(
+	SELECT F.Jmeno as FarnostJmeno, S.Jmeno as SpravceJmeno, S.Farar
+	FROM Farnosti F INNER JOIN Spravci S ON (S.Farnost_ID = F.ID)
+)
+go 
+
+-- Sv. smireni podle spravcu
+create view SpravciAZpovedi AS
+(
+	SELECT S.ID as Spravce_ID, S.Jmeno, S.Farar, S.Farnost_ID, U.Nazev, U.Konani, U.Kostel_ID, U.Delka 
+	FROM Spravci S INNER JOIN Udalosti_SvatostiSmireni U ON (S.ID = U.Zpovednik_ID)
+)
+go 
+
+-- Spr√°vci a statistiky zpovƒõd√≠
+create view SpravciAZpovediStatistiky as
+(
+	SELECT S.ID, S.Jmeno, count(U.ID) as PocetZpovidani, ISNULL(sum(U.delka), 0) as DelkaZpovidaniMinuty FROM Spravci S 
+	LEFT JOIN Udalosti_SvatostiSmireni U on (S.ID = U.Zpovednik_ID)
+	GROUP BY S.ID, S.Jmeno
+)
+go
+-- seznam lektor≈Ø s farnostmi kde ƒçetli
+create view LektoriAFarnosti AS
+(
+	SELECT DISTINCT L.ID, L.Jmeno as LektorJmeno, F.Jmeno as FarnostJmeno
+	FROM Lektori L 
+		LEFT OUTER JOIN Cteni C ON (C.Lektor_ID = L.ID)
+		INNER JOIN Mse M On(C.ID = M.Cteni1 or C.ID = M.Cteni2 or C.ID = M.Primluvy)
+		INNER JOIN Udalosti U ON(U.UdalostDetail_ID = M.ID and U.Typ = 1)
+		INNER JOIN Kostely K ON(K.ID = U.Kostel_ID)
+		INNER JOIN Farnosti F ON(K.Farnost_ID = F.ID)
+)
+
+
+-- Ostatni obrazovky podle me primo 
+-- z tabulek  + techhle pohledu- skoda na to psat
+-- dalsi pohledy

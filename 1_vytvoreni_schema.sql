@@ -7,11 +7,6 @@ mít přiřazeno právě jednoho lektora.
 */
 
 
-/* 
-*
-*  Tabulky
-*
-*/
 
 create table Farnosti(
 	ID INTEGER IDENTITY CONSTRAINT Farnosti_PK PRIMARY KEY,
@@ -25,11 +20,15 @@ create table Kostely(
 	PolohaLng FLOAT NOT NULL,
 
 	-- Patří k farnosti
-	FaronstID INTEGER NOT NULL CONSTRAINT Kostely_FK_Faronst REFERENCES Farnosti(ID)
-      ON DELETE NO ACTION,
+	Farnost_ID INTEGER NOT NULL CONSTRAINT Kostely_FK_Farnost REFERENCES Farnosti(ID)
+      ON DELETE NO ACTION INDEX Kostely_Farnost_IDX,
 	
 	-- Unikátní jméno kostela ve farnosti
-	constraint Kostely_UNIQ_FaronstID_Jmeno unique(FaronstID, Jmeno)
+	constraint Kostely_UNIQ_Farnost_ID_Jmeno unique(Farnost_ID, Jmeno),
+	-- validni souradnice
+	CONSTRAINT Kostely_ValidniPoloha check(PolohaLat > 0 and PolohaLat < 90 and PolohaLng > 0 and PolohaLng < 90),
+	-- pro hledani podle polohy
+	INDEX Kostely_Polohy_IDX (PolohaLat, PolohaLng)
 );
 
 
@@ -39,14 +38,10 @@ create table Spravci(
 	Jmeno VARCHAR(40) NOT NULL,
 	Farar BIT DEFAULT 0 NOT NULL,
 
-	-- Spravují faronst
-	FaronstID INTEGER NOT NULL CONSTRAINT Spravci_FK_Faronst REFERENCES Farnosti(ID)
-      ON DELETE NO ACTION
+	-- Spravují Farnost
+	Farnost_ID INTEGER NOT NULL CONSTRAINT Spravci_FK_Farnost REFERENCES Farnosti(ID)
+      ON DELETE NO ACTION INDEX Spravci_Farnost_IDX
 );
-
--- TODO zkontrolovat farare prave jednou
-
-
 
 
 create table Udalosti(
@@ -62,7 +57,10 @@ create table Udalosti(
 
 	-- patří ke kostelu, pokud se kostel smaže, události již nemá smysl uchovávat
 	Kostel_ID INTEGER NOT NULL CONSTRAINT Udalosti_FK_Kostel REFERENCES Kostely(ID)
-		ON DELETE CASCADE
+		ON DELETE CASCADE INDEX Udalosti_Kostel_IDX,
+	-- pro hledani a joiny podle typu a ID detailu události
+	INDEX Kostely_Polohy_IDX (Typ, UdalostDetail_ID),
+	INDEX Kostely_Polohy_IDX (UdalostDetail_ID, Typ)
 	);
 
 
@@ -77,18 +75,18 @@ create table Cteni(
 	Nazev VARCHAR(20),
 	-- Lektor, který čte
 	Lektor_ID INTEGER NOT NULL CONSTRAINT Cteni_FK_Lektor REFERENCES Lektori(ID)
-		ON DELETE NO ACTION
+		ON DELETE NO ACTION INDEX Cteni_Lektor_IDX
 );
 
 -- Typ 1 v udalostech
 create table Mse(
 	ID INTEGER IDENTITY CONSTRAINT Mse_PK PRIMARY KEY,
 	Cteni1 INTEGER NOT NULL CONSTRAINT Mse_FK_Cteni1 REFERENCES Cteni(ID)
-		ON DELETE NO ACTION,	
+		ON DELETE CASCADE INDEX Mse_Cteni1_IDX,	
 	Cteni2 INTEGER NOT NULL CONSTRAINT Mse_FK_Cteni2 REFERENCES Cteni(ID)
-		ON DELETE NO ACTION,
+		ON DELETE CASCADE  INDEX Mse_Cteni2_IDX,
 	Primluvy INTEGER NOT NULL CONSTRAINT MSE_FK_Primluvy REFERENCES CTENI(ID)
-		ON DELETE NO ACTION	
+		ON DELETE CASCADE INDEX Mse_Cteni3_IDX
 );
 
 -- Typ 2 v udalostech
@@ -98,7 +96,7 @@ create table SvatostiSmireni(
 	Delka INTEGER NOT NULL,
 	-- kdo zpovida
 	Zpovednik_ID INTEGER NOT NULL CONSTRAINT SvatostiSmireni_FK_Sprace REFERENCES Spravci(ID)
-		ON DELETE NO ACTION,
+		ON DELETE NO ACTION  INDEX SvatostiSmireni_Spravce_IDX,
 
 	CONSTRAINT SvatostSmireniDelkaKladna check(Delka>0)
 );
@@ -111,10 +109,4 @@ create table SchuzkySkupinek(
 );
 
 
-
-/*
-*
-*	Pohledy
-*
-*/
 

@@ -1,7 +1,7 @@
 Databáze kostelů a mší a události v nich.
 
 
-Farnost ----> Kostely          <-------------------------------->      Události   ---> Mše      --->        Čtení     <---- Lektoři
+Farnost ----> Kostely           -------------------------------->      Události   ---> Mše      --->        Čtení     <---- Lektoři
         ----> Správci (farář)                                                     ---> Svátost smíření                                                                                                        ---> Schůzka skupinek
     
  

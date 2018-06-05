@@ -3,17 +3,18 @@
 
 INSERT INTO Farnosti(Jmeno) VALUES 
     ('Dobrá'), 
-    ('Frýdek-Místek');
+    ('Frýdek-Místek'),
+    ('Praha');
 
 -- Kostely
-INSERT INTO Kostely(Jmeno, PolohaLat, PolohaLng, FaronstID) VALUES
+INSERT INTO Kostely(Jmeno, PolohaLat, PolohaLng, Farnost_ID) VALUES
     ('Sv. Jiří', 49.6735104, 18.4139472, 1),
     ('Sv. Antonína', 49.9735104, 18.5139472, 1),
     ('Sv. Ignáce', 50.1735104, 19.1139472, 2),
     ('Sv. Pavla', 50.3735104, 19.1439472, 2);
 
 -- Správci
-INSERT INTO Spravci(Jmeno, Farar, FaronstID) VALUES
+INSERT INTO Spravci(Jmeno, Farar, Farnost_ID) VALUES
     ('Marek Kozak', 1, 1),
     ('Lukáš Březina', 0, 1),
     ('Karel Lakatoš', 1, 2),
