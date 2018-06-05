@@ -59,8 +59,8 @@ create table Udalosti(
 	Kostel_ID INTEGER NOT NULL CONSTRAINT Udalosti_FK_Kostel REFERENCES Kostely(ID)
 		ON DELETE CASCADE INDEX Udalosti_Kostel_IDX,
 	-- pro hledani a joiny podle typu a ID detailu události
-	INDEX Kostely_Polohy_IDX (Typ, UdalostDetail_ID),
-	INDEX Kostely_Polohy_IDX (UdalostDetail_ID, Typ)
+	INDEX Udalosti_Typ_Detail_IDX (Typ, UdalostDetail_ID),
+	INDEX Udalosti_Detail_Typ_IDX (UdalostDetail_ID, Typ)
 	);
 
 
@@ -82,11 +82,11 @@ create table Cteni(
 create table Mse(
 	ID INTEGER IDENTITY CONSTRAINT Mse_PK PRIMARY KEY,
 	Cteni1 INTEGER NOT NULL CONSTRAINT Mse_FK_Cteni1 REFERENCES Cteni(ID)
-		ON DELETE CASCADE INDEX Mse_Cteni1_IDX,	
+		ON DELETE NO ACTION INDEX Mse_Cteni1_IDX,
 	Cteni2 INTEGER NOT NULL CONSTRAINT Mse_FK_Cteni2 REFERENCES Cteni(ID)
-		ON DELETE CASCADE  INDEX Mse_Cteni2_IDX,
+		ON DELETE NO ACTION  INDEX Mse_Cteni2_IDX,
 	Primluvy INTEGER NOT NULL CONSTRAINT MSE_FK_Primluvy REFERENCES CTENI(ID)
-		ON DELETE CASCADE INDEX Mse_Cteni3_IDX
+		ON DELETE NO ACTION INDEX Mse_Cteni3_IDX
 );
 
 -- Typ 2 v udalostech

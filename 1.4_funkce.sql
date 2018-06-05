@@ -194,14 +194,23 @@ begin tran
 
 go
 
--- odstranit mši
+-- odstranit mši  s čteními
 create procedure odstranit_msi
     @mse_id INTEGER
 AS
+    -- @C1, @C2, @P = IDčka čtení pro mazanou mši
+    declare @C1 INTEGER, @C2 INTEGER, @P INTEGER;
+    SELECT @C1 = (SELECT cteni1 from Mse where ID = @mse_id),
+            @C2 =  (SELECT cteni2 from Mse where ID = @mse_id),
+            @P = (SELECT primluvy from Mse where ID = @mse_id);
+
     -- odstranění z tabulky mší
     delete from Mse where ID = @mse_id;
     -- odstranění z tabulky událostí
     delete from Udalosti where Typ = 1 and UdalostDetail_ID = @mse_id;
+    -- odstranění všech čtení mší
+    delete from Cteni where ID = @C1 or ID = @C2 or ID = @P;
+
 go 
 
 -- přidávání svátostí smíření

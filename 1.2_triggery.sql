@@ -23,4 +23,21 @@ BEGIN
 	end;
 END;
 
-
+GO
+-- nelze přiřadit čtení jako čtení1 a zároveň čtení2 nebo přímluvy 
+CREATE TRIGGER unikatni_cteni
+ON Mse
+AFTER INSERT, UPDATE
+AS
+BEGIN
+	if exists(
+		SELECT * FROM INSERTED 
+		where Cteni1 = Cteni2 OR
+			  Cteni2 = Primluvy OR
+			  Primluvy = Cteni1
+	)	
+	begin -- jedno cteni pouzito dvakrat
+		RAISERROR( 'Ctení nemuze byt pouzito dvakrat!', 15, 1);
+		ROLLBACK TRANSACTION --zahajena updatem
+	end;
+END;
