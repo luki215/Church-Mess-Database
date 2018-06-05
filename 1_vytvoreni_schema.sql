@@ -1,7 +1,7 @@
 /* 
 Máme farnost(1). Každá farnost má M správců(2), z nichž právě jeden musí být farář (integritní omezení).
 Ke každé farnosti patří M kostelů (3). V těchto kostelích se konají události(4) různých druhů - pro tuto aplikaci jen Mše, 
-svátost smíření a schůzka skupinek. Události obecně mají jen datum a čas konání + M kostelů, ke kterým se vztahují.
+svátost smíření a schůzka skupinek. Události obecně mají jen datum a čas konání + kostel, ke kterým se vztahují.
 Dále máme lektory (5), kteří jsou přiřazeni k M čtením (6). Ke každé mši patří 3 různá čtení, kdy každé z nich musí 
 mít přiřazeno právě jednoho lektora. 
 */
